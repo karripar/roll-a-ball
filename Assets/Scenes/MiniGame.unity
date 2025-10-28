@@ -2470,7 +2470,7 @@ GameObject:
   - component: {fileID: 1571574557}
   m_Layer: 0
   m_Name: Ground
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3020,6 +3020,7 @@ MonoBehaviour:
   speed: 10
   countText: {fileID: 1172949170}
   winTextObject: {fileID: 1078745264}
+  jumpF: 2.5
 --- !u!114 &1999593180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3058,7 +3059,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1999593174}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 0.8
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
