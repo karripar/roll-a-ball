@@ -1,92 +1,100 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using System.Collections; // Needed for Coroutine
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
- private Rigidbody rb; 
+    private Rigidbody rb;
+    private int count;
+    private float movementX;
+    private float movementY;
 
+    public float speed = 0f;
+    public TextMeshProUGUI countText;
+    public GameObject winTextObject;
+    public float jumpF = 2.5f;
+    private bool isGrounded = true;
 
- private int count;
+    
 
- private float movementX;
- private float movementY;
-
- public float speed = 0;
-
- public TextMeshProUGUI countText;
-
- public GameObject winTextObject;
-
- // Start is called before the first frame update.
- void Start()
+    void Start()
     {
         rb = GetComponent<Rigidbody>();
-
         count = 0;
-
         SetCountText();
-
         winTextObject.SetActive(false);
     }
- 
- // This function is called when a move input is detected.
- void OnMove(InputValue movementValue)
+
+    void OnMove(InputValue movementValue)
     {
         Vector2 movementVector = movementValue.Get<Vector2>();
-
-        movementX = movementVector.x; 
-        movementY = movementVector.y; 
+        movementX = movementVector.x;
+        movementY = movementVector.y;
     }
 
- // FixedUpdate is called once per fixed frame-rate frame.
- private void FixedUpdate() 
+    private void FixedUpdate()
     {
-        Vector3 movement = new Vector3 (movementX, 0.0f, movementY);
-
-        rb.AddForce(movement * speed); 
+        Vector3 movement = new Vector3(movementX, 0.0f, movementY);
+        rb.AddForce(movement * speed);
     }
 
- 
- void OnTriggerEnter(Collider other) 
+    void OnTriggerEnter(Collider other)
     {
- // Check if the object the player collided with has the "PickUp" tag.
- if (other.gameObject.CompareTag("PickUp")) 
+        if (other.gameObject.CompareTag("PickUp"))
         {
             other.gameObject.SetActive(false);
-
-            count = count + 1;
-
+            count++;
             SetCountText();
         }
     }
 
- // Function to update the displayed count of "PickUp" objects collected.
- void SetCountText() 
+    void SetCountText()
     {
         countText.text = "Count: " + count.ToString();
 
- if (count >= 10)
+        if (count >= 10)
         {
             winTextObject.SetActive(true);
-
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));
         }
     }
 
-private void OnCollisionEnter(Collision collision)
-{
- if (collision.gameObject.CompareTag("Enemy"))
+    private void OnCollisionEnter(Collision collision)
     {
-        Destroy(gameObject); 
- 
- // Update the winText to display "You Lose!"
-        winTextObject.gameObject.SetActive(true);
-        winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
- 
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            // Show "You Lose!" message
+            winTextObject.SetActive(true);
+            winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
+
+            // Stop player movement
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            // Start reset coroutine
+            StartCoroutine(ResetAfterDelay(2f)); // 2 seconds delay
+        }
+
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+        }
     }
 
+    private IEnumerator ResetAfterDelay(float delay)
+{
+    yield return new WaitForSeconds(delay);
+    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 }
 
-
+    void Update()
+    {
+        if (isGrounded && Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            rb.AddForce(Vector3.up * jumpF, ForceMode.Impulse);
+            isGrounded = false;
+        }
+    }
 }
